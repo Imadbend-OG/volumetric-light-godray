@@ -1,21 +1,28 @@
-* {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  width: 100%;
-  height: 100%;
+html, body, #root {
   margin: 0;
   padding: 0;
-}
-
-#root {
-  background: #101010;
+  width: 100vw;
+  overflow-x: hidden;
+  color: white;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica neue, helvetica, ubuntu, roboto, noto, segoe ui, arial, sans-serif;
-  color: black;
+  background: #050505;
+  font-family: sans-serif;
+  cursor: url('/images/ellipse.svg') 16 16, pointer;
+}
+
+.scrollArea {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* cache la scrollbar Firefox */
+}
+
+.scrollArea::-webkit-scrollbar {
+  display: none; /* cache la scrollbar Chrome */
 }
