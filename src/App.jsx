@@ -9,6 +9,7 @@ import Effects from './components/Effects'
 import Text from './components/Text'
 import Geo from './components/Geo'
 import state from './state'
+import Header from './components/Header'
 
 // ── Video shader ──────────────────────────────────────────────────────────────
 const VideoFadeMaterial = shaderMaterial(
@@ -275,6 +276,37 @@ function ScrollOverlay({ pages, setPages }) {
   )
 }
 
+function HeroText() {
+  const [opacity, setOpacity] = useState(1)
+  useEffect(() => {
+    let animFrame
+    const loop = () => {
+      const o = Math.max(0, 1 - state.top / (window.innerHeight * 0.5))
+      setOpacity(o)
+      animFrame = requestAnimationFrame(loop)
+    }
+    animFrame = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(animFrame)
+  }, [])
+  return (
+    <div style={{
+      position: 'fixed',
+      top: '50%',
+      left: '-4%',
+      transform: 'translateY(-50%)',
+      zIndex: 50,
+      pointerEvents: 'none',
+      opacity,
+    }}>
+      <img
+        src="/images/hero-text.png"
+        alt="E-Optima"
+        style={{ width: 'clamp(400px, 60vw, 1000px)', objectFit: 'contain' }}
+      />
+    </div>
+  )
+}
+
 // ── ROOT APP — single scroll controls everything ──────────────────────────────
 export default function App() {
   const scrollRef = useRef(null)
@@ -304,6 +336,10 @@ export default function App() {
 
   return (
     <>
+      {/* ── Header ── */}
+      <Header onAccountClick={() => console.log('compte cliqué')} />
+      <HeroText />
+
       {/* ── Single global scroll container ── */}
       <div
         ref={scrollRef}
