@@ -6,11 +6,11 @@ const state = {
   content: [
     {
       tag: '00',
-      text: `The Bacchic\nand Dionysiac\nRites`,
+      text: `Un Futur énergétique\nincertain et complexe`,
       images: ['/images/BH41NVu.jpg', '/images/fBoIJLX.jpg', '/images/04zTfWB.jpg'],
     },
-    { tag: '01', text: `The Elysian\nMysteries`, images: ['/images/c4cA8UN.jpg', '/images/ajQ73ol.jpg', '/images/gZOmLNU.jpg'] },
-    { tag: '02', text: `The Hiramic\nLegend`, images: ['/images/mbFIW1b.jpg', '/images/gwuZrgo.jpg', '/images/04zTfWB.jpg'] },
+    { tag: '01', text: `E-Optima:\nIntelligence au service\nde l'énergie`, images: ['/images/c4cA8UN.jpg', '/images/ajQ73ol.jpg', '/images/gZOmLNU.jpg'] },
+    { tag: '02', text: `Comment \nça marche?`, images: ['/images/mbFIW1b.jpg', '/images/gwuZrgo.jpg', '/images/04zTfWB.jpg'] },
   ],
   depthbox: [
     {

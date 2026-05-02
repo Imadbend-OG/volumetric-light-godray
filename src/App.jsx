@@ -10,6 +10,7 @@ import Text from './components/Text'
 import Geo from './components/Geo'
 import state from './state'
 import Header from './components/Header'
+import AuthModal from './components/AuthModal'
 
 // ── Video shader ──────────────────────────────────────────────────────────────
 const VideoFadeMaterial = shaderMaterial(
@@ -291,8 +292,8 @@ function HeroText() {
   return (
     <div style={{
       position: 'fixed',
-      top: '50%',
-      left: '-4%',
+      top: '52%',
+      left: '-7%',
       transform: 'translateY(-50%)',
       zIndex: 50,
       pointerEvents: 'none',
@@ -301,7 +302,7 @@ function HeroText() {
       <img
         src="/images/hero-text.png"
         alt="E-Optima"
-        style={{ width: 'clamp(400px, 60vw, 1000px)', objectFit: 'contain' }}
+        style={{ width: 'clamp(600px, 60vw, 1000px)', objectFit: 'contain' }}
       />
     </div>
   )
@@ -314,6 +315,7 @@ export default function App() {
   const currentScroll = useRef(0)
   const [pages, setPages] = useState(0)
   const [showScroll, setShowScroll] = useState(true)
+  const [showAuth, setShowAuth] = useState(false)
 
   // Single global scroll handler
   const onScroll = (e) => {
@@ -337,8 +339,9 @@ export default function App() {
   return (
     <>
       {/* ── Header ── */}
-      <Header onAccountClick={() => console.log('compte cliqué')} />
+      <Header onAccountClick={() => setShowAuth(true)} />
       <HeroText />
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
       {/* ── Single global scroll container ── */}
       <div
