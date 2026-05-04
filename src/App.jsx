@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import React, { Suspense, useEffect, useRef, useState, useCallback, useLayoutEffect, forwardRef, useMemo } from 'react'
 import { Canvas, useThree, useFrame, useLoader, extend } from '@react-three/fiber'
 import { Flex, Box, useFlexSize } from '@react-three/flex'
-import { Loader, Line, useAspect, CubeCamera, Float, MeshReflectorMaterial, shaderMaterial } from '@react-three/drei'
+import { Loader, Line, useAspect, CubeCamera, Float, MeshReflectorMaterial, shaderMaterial, Html } from '@react-three/drei'
 import { EffectComposer, GodRays, Bloom } from '@react-three/postprocessing'
 import { easing } from 'maath'
 import Effects from './components/Effects'
@@ -11,6 +11,9 @@ import Geo from './components/Geo'
 import state from './state'
 import Header from './components/Header'
 import AuthModal from './components/AuthModal'
+
+// État global partagé
+const hoverState = { active: false }
 
 // ── Video shader ──────────────────────────────────────────────────────────────
 const VideoFadeMaterial = shaderMaterial(
@@ -91,7 +94,7 @@ function VideoScreen() {
   )
 }
 
-function VideoRig({ scrollY }) {
+function VideoRig() {
   useFrame((state, delta) => {
     easing.damp3(
       state.camera.position,
@@ -118,8 +121,171 @@ function HeightReporter({ onReflow }) {
   return null
 }
 
-function Page({ text, tag, images, textScaleFactor, onReflow, left = false }) {
-  const textures = useLoader(THREE.TextureLoader, images)
+function VideoMesh({ src, width, height }) {
+  const texture = useMemo(() => {
+    const vid = document.createElement('video')
+    vid.src = src
+    vid.crossOrigin = 'Anonymous'
+    vid.loop = true
+    vid.muted = true
+    vid.autoplay = true
+    vid.play()
+    return new THREE.VideoTexture(vid)
+  }, [src])
+
+  return (
+    <mesh>
+      <planeGeometry args={[width, height]} />
+      <meshBasicMaterial map={texture} toneMapped={false} />
+    </mesh>
+  )
+}
+
+function HoverButton({ left }) {
+  const [hovered, setHovered] = useState(false)
+  const timeoutRef = useRef(null)
+  const [vidIndex, setVidIndex] = useState(0)
+  const playlist = ['/Vids/vid1.mp4', '/Vids/vid2.mp4', '/Vids/vid4.mp4']
+
+  const handleMouseEnter = () => {
+    clearTimeout(timeoutRef.current)
+    setHovered(true)
+    hoverState.active = true
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setHovered(false)
+      hoverState.active = false
+    }, 200)
+  }
+
+  return (
+    <Html position={[-4, -15, 0]} center style={{ pointerEvents: 'all' }}>
+      <div style={{ position: 'relative' }}>
+
+        {/* Bouton */}
+        <div
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            padding: '50px 300px',
+            borderRadius: '20px',
+            background: hovered ? 'rgba(255,255,255,0.35)' : 'rgba(180,180,180,0.18)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: '1px solid rgba(200,200,200,0.4)',
+            color: hovered ? '#111' : '#666',
+            fontSize: '18px',
+            fontWeight: 500,
+            fontFamily: 'sans-serif',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            whiteSpace: 'nowrap',
+            letterSpacing: '0.03em',
+            userSelect: 'none',
+            position: 'relative',
+            zIndex: 2,
+          }}>
+          En savoir plus
+        </div>
+
+        {/* Panel hover */}
+        <div
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            position: 'absolute',
+            bottom: '-300px',          // ← au dessus du bouton
+            left: '-70%',              // ← centré par rapport au bouton
+            transform: 'translateX(-50%)',  // ← centrage parfait
+            width: '900px',
+            borderRadius: '20px',
+            overflow: 'hidden',
+            display: 'flex',
+            boxShadow: '0 30px 80px rgba(0,0,0,0.15)',
+            border: '1px solid rgba(200,200,200,0.3)',
+            opacity: hovered ? 1 : 0,
+            pointerEvents: hovered ? 'all' : 'none',
+            transition: 'opacity 0.35s ease, transform 0.35s ease',
+            transform: hovered
+              ? 'translateX(-50%) translateY(0px)'
+              : 'translateX(-50%) translateY(12px)',
+            zIndex: 999,
+          }}>
+
+          {/* Vidéo gauche */}
+          <div style={{
+            width: '45%', position: 'relative',
+            minHeight: '800px', background: '#111', flexShrink: 0,
+          }}>
+            <video 
+              src={playlist[vidIndex]} 
+              autoPlay 
+              muted 
+              playsInline
+              onEnded={() => setVidIndex((prev) => (prev + 1) % playlist.length)}
+              style={{
+                width: '100%', height: '100%', objectFit: 'cover',
+                position: 'absolute', inset: 0, opacity: 0.85,
+              }} />
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)',
+              padding: '24px', display: 'flex', alignItems: 'flex-end',
+            }}>
+              <p style={{
+                color: 'white', fontSize: '18px', fontWeight: 700,
+                fontFamily: 'sans-serif', lineHeight: 1.4, margin: 0,
+              }}>
+                Un futur énergétique<br />incertain et complexe
+              </p>
+            </div>
+          </div>
+
+          {/* Texte blur droite */}
+          <div style={{
+            flex: 1,
+            background: 'rgba(255,255,255,0.55)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            padding: '32px 28px',
+            display: 'flex', flexDirection: 'column',
+            justifyContent: 'center', gap: '16px',
+          }}>
+            <p style={{
+              fontSize: '13px', color: '#444',
+              lineHeight: 1.7, margin: 0, fontFamily: 'sans-serif',
+            }}>
+              La variabilité climatique, la croissance de la demande et la complexité des réseaux rendent la gestion énergétique de plus en plus difficile.
+            </p>
+            {['Demande imprévisible', 'Impact du climat', 'Coûts opérationnels élevés', 'Risque de déséquilibre du réseau'].map((item, i) => (
+              <div key={i} style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                fontSize: '13px', fontFamily: 'sans-serif', color: '#222', fontWeight: 500,
+              }}>
+                <div style={{
+                  width: '22px', height: '22px', borderRadius: '50%',
+                  background: 'rgba(50,180,100,0.15)',
+                  border: '1.5px solid rgba(50,180,100,0.5)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                }}>
+                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6l3 3 5-5" stroke="#2eb866" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Html>
+  )
+}
+
+function Page({ text, tag, images, subtitle, textScaleFactor, onReflow, left = false, ...props }) {
+  const textures = useLoader(THREE.TextureLoader, images && images.length > 0 ? images : ['/images/chatn.png'])
   const { viewport } = useThree()
   const boxProps = {
     centerAnchor: true, grow: 1, marginTop: 1,
@@ -127,20 +293,36 @@ function Page({ text, tag, images, textScaleFactor, onReflow, left = false }) {
     width: 'auto', height: 'auto',
     minWidth: 3, minHeight: 3, maxWidth: 6, maxHeight: 6,
   }
+  const items = props.videos && props.videos.length > 0 ? props.videos : null
+
   return (
     <Box dir="column" align={left ? 'flex-start' : 'flex-end'} justify="flex-start" width="100%" height="auto" minHeight="100%">
       <HeightReporter onReflow={onReflow} />
       <Box dir="row" width="100%" height="auto" justify={left ? 'flex-end' : 'flex-start'} margin={0} grow={1} wrap="wrap">
-        {textures.map((texture, index) => (
-          <Box key={index} {...boxProps}>
-            {(width, height) => (
-              <mesh>
-                <planeGeometry args={[width, height]} />
-                <meshBasicMaterial map={texture} toneMapped={false} />
-              </mesh>
-            )}
+        {items
+          ? items.map((src, index) => (
+            <Box key={index} {...boxProps}>
+              {(width, height) => (
+                <VideoMesh src={src} width={width} height={height} />
+              )}
+            </Box>
+          ))
+          : textures.map((texture, index) => (
+            <Box key={index} {...boxProps}>
+              {(width, height) => (
+                <mesh>
+                  <planeGeometry args={[width, height]} />
+                  <meshBasicMaterial map={texture} toneMapped={false} />
+                </mesh>
+              )}
+            </Box>
+          ))
+        }
+        {tag === '00' && (
+          <Box centerAnchor width={5} height={6} marginLeft={1} marginRight={0} alignSelf="center">
+            {() => <HoverButton left={left} />}
           </Box>
-        ))}
+        )}
       </Box>
       <Box marginLeft={1.5} marginRight={1.5} marginTop={2}>
         <Text position={[left ? 1 : -1, 0.5, 1]} fontSize={textScaleFactor} lineHeight={1} letterSpacing={-0.05} maxWidth={(viewport.width / 4) * 3}>
@@ -190,7 +372,6 @@ function ScrollContent({ onReflow }) {
   const vec = new THREE.Vector3()
   const pageLerp = useRef(state.top / size.height)
   useFrame(() => {
-    // state.top is offset by window height (first section = 100vh)
     const scrollOffset = Math.max(0, state.top - size.height)
     const page = (pageLerp.current = THREE.MathUtils.lerp(pageLerp.current, scrollOffset / size.height, 0.15))
     const y = page * viewport.height
@@ -239,7 +420,6 @@ function ScrollOverlay({ pages, setPages }) {
   useEffect(() => {
     let animFrame
     const loop = () => {
-      // Appear only after scrolling past 80% of first section (100vh)
       const threshold = window.innerHeight * 0.8
       const target = state.top > threshold ? 1 : 0
       opacity.current += (target - opacity.current) * 0.7
@@ -251,15 +431,12 @@ function ScrollOverlay({ pages, setPages }) {
   }, [])
 
   return (
-    <div
-      ref={divRef}
-      style={{
-        position: 'fixed', top: 0, left: 0,
-        width: '100vw', height: '100vh',
-        zIndex: 1, opacity: 0,
-        transition: 'none',
-        backgroundColor: '#f5f5f5',
-      }}>
+    <div ref={divRef} style={{
+      position: 'fixed', top: 0, left: 0,
+      width: '100vw', height: '100vh',
+      zIndex: 1, opacity: 0, transition: 'none',
+      backgroundColor: '#f5f5f5',
+    }}>
       <Canvas shadows dpr={[1, 2]}
         camera={{ position: [0, 0, 10], far: 1000 }}
         gl={{ powerPreference: 'high-performance', alpha: false, antialias: false, stencil: false, depth: false }}
@@ -291,78 +468,66 @@ function HeroText() {
   }, [])
   return (
     <div style={{
-      position: 'fixed',
-      top: '52%',
-      left: '-7%',
+      position: 'fixed', top: '52%', left: '-7%',
       transform: 'translateY(-50%)',
-      zIndex: 50,
-      pointerEvents: 'none',
-      opacity,
+      zIndex: 50, pointerEvents: 'none', opacity,
     }}>
-      <img
-        src="/images/hero-text.png"
-        alt="E-Optima"
-        style={{ width: 'clamp(600px, 60vw, 1000px)', objectFit: 'contain' }}
-      />
+      <img src="/images/hero-text.png" alt="E-Optima"
+        style={{ width: 'clamp(600px, 60vw, 1000px)', objectFit: 'contain' }} />
     </div>
   )
 }
 
-// ── ROOT APP — single scroll controls everything ──────────────────────────────
+// ── ROOT APP ──────────────────────────────────────────────────────────────────
 export default function App() {
-  const scrollRef = useRef(null)
   const targetScroll = useRef(0)
   const currentScroll = useRef(0)
   const [pages, setPages] = useState(0)
   const [showScroll, setShowScroll] = useState(true)
   const [showAuth, setShowAuth] = useState(false)
 
-  // Single global scroll handler
-  const onScroll = (e) => {
-    targetScroll.current = e.target.scrollTop
-    if (e.target.scrollTop > 50) setShowScroll(false)
-    else setShowScroll(true)
-  }
-
-  // Smooth lerp loop — updates state.top for both scenes
+  // Tout le scroll est géré ici via wheel
   useEffect(() => {
     let animFrame
+
+    const onWheel = (e) => {
+      if (hoverState.active) return  // bloque si hover actif
+      targetScroll.current = Math.max(0, targetScroll.current + e.deltaY)
+      if (targetScroll.current > 50) setShowScroll(false)
+      else setShowScroll(true)
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: true })
+
     const loop = () => {
       currentScroll.current += (targetScroll.current - currentScroll.current) * 0.7
       state.top = currentScroll.current
       animFrame = requestAnimationFrame(loop)
     }
     animFrame = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(animFrame)
+
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      cancelAnimationFrame(animFrame)
+    }
   }, [])
 
   return (
     <>
-      {/* ── Header ── */}
       <Header onAccountClick={() => setShowAuth(true)} />
       <HeroText />
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
-      {/* ── Single global scroll container ── */}
+      {/* Div pour pointer move uniquement — pas de scroll ici */}
       <div
-        ref={scrollRef}
-        onScroll={onScroll}
         onPointerMove={(e) => (state.mouse = [(e.clientX / window.innerWidth) * 2 - 1, (e.clientY / window.innerHeight) * 2 - 1])}
         style={{
-          position: 'fixed',
-          top: 0, left: 0,
-          width: '100vw',
-          height: '100vh',
-          overflowY: 'scroll',
-          overflowX: 'hidden',
-          zIndex: 100,
-          scrollbarWidth: 'none',
-        }}>
-        {/* Tall div = video section (100vh) + scroll section */}
-        <div style={{ height: `${100 + pages * 100}vh`, pointerEvents: 'none' }} />
-      </div>
+          position: 'fixed', top: 0, left: 0,
+          width: '100vw', height: '100vh',
+          zIndex: 100, pointerEvents: 'none',
+        }} />
 
-      {/* ── Video scene — fixed, always behind ── */}
+      {/* Video scene */}
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 0 }}>
         <Canvas camera={{ position: [0, 0, 30], fov: 35, near: 1, far: 60 }} gl={{ antialias: false }}>
           <color attach="background" args={['#050505']} />
@@ -383,10 +548,10 @@ export default function App() {
         </Canvas>
       </div>
 
-      {/* ── Scroll scene — fixed, appears on top when scrolled ── */}
+      {/* Scroll scene */}
       <ScrollOverlay pages={pages} setPages={setPages} />
 
-      {/* ── Scroll hint ── */}
+      {/* Scroll hint */}
       <div style={{
         position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
         color: 'white', fontSize: 13, letterSpacing: '0.15em', textTransform: 'uppercase',

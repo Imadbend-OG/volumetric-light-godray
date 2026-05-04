@@ -7,23 +7,23 @@ const state = {
     {
       tag: '00',
       text: `Un Futur énergétique\nincertain et complexe`,
-      images: ['/images/BH41NVu.jpg', '/images/fBoIJLX.jpg', '/images/04zTfWB.jpg'],
+      images: ['/images/chatn.png', '/images/chate.png', '/images/chatp.png'],
     },
-    { tag: '01', text: `E-Optima:\nIntelligence au service\nde l'énergie`, images: ['/images/c4cA8UN.jpg', '/images/ajQ73ol.jpg', '/images/gZOmLNU.jpg'] },
-    { tag: '02', text: `Comment \nça marche?`, images: ['/images/mbFIW1b.jpg', '/images/gwuZrgo.jpg', '/images/04zTfWB.jpg'] },
+    { tag: '01', text: `E-Optima:\nIntelligence au service\nde l'énergie`, images: ['/images/cha.png', '/images/chb.png', '/images/chc.png'] },
+    { tag: '02', text: `Comment \nça marche?`, images: ['/images/coa.png', '/images/cob.png', '/images/coc.png'] },
   ],
   depthbox: [
     {
       depth: 0,
       color: '#cccccc',
       textColor: '#ffffff',
-      text: 'In a void,\nno one could say\nwhy a thing\nonce set in motion\nshould stop anywhere.',
+      text: 'Là où,\n l’IA rencontre\n  l’énergie,\n l’efficacité devient\n  réalité.',
       image: '/images/cAKwexj.jpg',
     },
     {
       depth: -5,
       textColor: '#272727',
-      text: 'For why should it stop\nhere rather than here?\nSo that a thing\nwill either be at rest\nor must be moved\nad infinitum.',
+      text: 'Dans un monde où l’énergie devient une ressource critique,\ncomprendre ne suffit plus.\nIl faut anticiper,\nmodéliser et décider\nintelligemment.Notre approche transforme les données en vision,et la vision en actions concrètes pour un avenir énergétique durable',
       image: '/images/04zTfWB.jpg',
     },
   ],
